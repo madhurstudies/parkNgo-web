@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>parkNgo - Smart City Parking Solutions</title>
-    <meta name="description" content="Find and book premium, secure parking spots in real-time with parkNgo. Experience the future of smart city parking.">
+    <title>parkNgo - Analytics for Owners & Rewards for Drivers</title>
+    <meta name="description" content="parkNgo provides state-of-the-art parking analytics, user dashboards for owners, and exclusive discounts for verified Ola and Uber drivers.">
     <link rel="stylesheet" href="assets/css/styles.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,48 +15,44 @@
         <nav>
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="find-parking.html">Find Parking</a></li>
-                <li><a href="how-it-works.html">How It Works</a></li>
-                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="owner-dashboard.html">For Owners</a></li>
+                <li><a href="driver-rewards.html">Driver Discounts</a></li>
             </ul>
         </nav>
-        <a href="login.html" class="cta-btn">Sign In / Register</a>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="#available-spots" style="color: var(--text-light); border: 1px solid var(--accent-cyan); padding: 0.8rem 1.8rem; border-radius: 30px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='var(--accent-cyan)'; this.style.color='#0b0f19';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-light)';">Check Available Spots</a>
+            <a href="login.html" class="cta-btn">Sign In / Register</a>
+        </div>
     </header>
 
     <main>
         <section class="hero">
             <div class="hero-content">
-                <h1 class="hero-title">Discover the Future of Smart Parking.</h1>
-                <p class="hero-subtitle">Effortlessly find, reserve, and navigate to your perfect parking spot. Avoid the hassle with our real-time smart city integration and secure your space in seconds.</p>
-                <div class="hero-buttons">
-                    <a href="find-parking.html" class="cta-btn">Find a Spot <i class="fa-solid fa-arrow-right"></i></a>
-                    <a href="how-it-works.html" class="secondary-btn">Learn More</a>
-                </div>
+                <h1 class="hero-title">Empowering Parking Owners & Rideshare Drivers.</h1>
+                <p class="hero-subtitle">Optimize your parking space with state-of-the-art analytics and user dashboards. Are you a registered Ola or Uber driver? Verify your profile for exclusive parking discounts.</p>
             </div>
             
             <div class="hero-image-container">
                 <div class="glow-circle cyan"></div>
                 <div class="glow-circle"></div>
                 
-                <img src="assets/images/hero.png" alt="parkNgo Smart Parking Interface" class="hero-image">
-                
                 <div class="floating-widget widget-1">
                     <div class="widget-icon">
-                        <i class="fa-solid fa-location-dot"></i>
+                        <i class="fa-solid fa-chart-pie"></i>
                     </div>
                     <div class="widget-text">
-                        <h4>Central Garage</h4>
-                        <p>12 Spots Available</p>
+                        <h4>Live Analytics</h4>
+                        <p>+24% Revenue</p>
                     </div>
                 </div>
 
                 <div class="floating-widget widget-2">
                     <div class="widget-icon" style="background: rgba(157, 78, 221, 0.2); color: var(--accent-purple);">
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="fa-brands fa-uber"></i>
                     </div>
                     <div class="widget-text">
-                        <h4>Secure Parking</h4>
-                        <p style="color: var(--accent-purple);">24/7 Surveillance</p>
+                        <h4>Verified Driver</h4>
+                        <p style="color: var(--accent-purple);">50% Off Parking</p>
                     </div>
                 </div>
             </div>
