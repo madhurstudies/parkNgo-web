@@ -37,9 +37,129 @@
             box-shadow: 0 5px 15px rgba(0, 243, 255, 0.2);
             transform: translateY(-2px);
         }
+        .logout-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--accent-purple);
+            border-radius: 8px;
+            font-weight: 600;
+            background: rgba(157, 78, 221, 0.1);
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: var(--accent-purple);
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3);
+            color: #fff;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: var(--text-light);
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--text-light);
+        }
+        .btn-confirm {
+            background: transparent;
+            border: 1px solid var(--accent-purple);
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-confirm:hover {
+            background: var(--accent-purple);
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3);
+        }
     </style>
 </head>
 <body>
     <a href="owner-dashboard.html" class="png-logo">P<span>n</span>G</a>
+    <a href="#" class="logout-btn" onclick="openModal(event)">Logout</a>
+
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Confirm Logout</h2>
+            <p class="modal-text">Are you sure you want to end your current session?</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="window.location.href='login.html'">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(e) {
+            e.preventDefault();
+            document.getElementById('logoutModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('logoutModal').classList.remove('active');
+        }
+    </script>
 </body>
 </html>
