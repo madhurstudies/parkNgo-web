@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserved Dashboard - parkNgo</title>
+    <meta name="description" content="Administrative dashboard for managing and verifying pre-booked parking reservations at ParkNGo.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent-green: #00ff88;
+            --accent-green-dark: #00cc6a;
+            --accent-green-glow: rgba(0, 255, 136, 0.2);
+            --status-expected: #f59e0b;
+            --status-arrived: #00ff88;
+            --status-completed: #8a96b3;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body { overflow-x: hidden; min-height: 100vh; }
+
+        /* ── TOP NAV ── */
+        .dash-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-brand { display: flex; align-items: center; gap: 1rem; }
+        .nav-brand .logo { font-size: 1.5rem; font-weight: 800; color: var(--text-light); text-decoration: none; }
+        .nav-brand .logo span { color: var(--accent-cyan); }
+
+        .module-pill {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            color: var(--accent-green);
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+
+        .nav-staff {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .staff-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-green-dark), var(--accent-green));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0b0f19;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .nav-clock {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            border-color: rgba(255,60,60,0.4);
+            color: #ff6b6b;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .dash-layout {
+            display: flex;
+            padding-top: 70px;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.02);
+            border-right: 1px solid var(--card-border);
+            padding: 2rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(138, 150, 179, 0.5);
+            padding: 0.5rem 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .sidebar-label:first-child { margin-top: 0; }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.75rem 0.9rem;
+            border-radius: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-family: 'Outfit', sans-serif;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-light);
+        }
+
+        .sidebar-item.active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 255, 136, 0.18);
+        }
+
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-green);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .dash-main {
+            flex: 1;
+            padding: 2rem 2.5rem;
+            overflow-y: auto;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        .page-header h1 span {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p { color: var(--text-muted); margin-top: 0.3rem; font-size: 0.9rem; }
+
+        .header-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* ── STAT CARDS ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--card-accent, var(--accent-cyan));
+        }
+
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+        .stat-delta {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .delta-up { background: rgba(0,255,136,0.12); color: var(--accent-green); }
+        .delta-warn { background: rgba(245,158,11,0.12); color: var(--status-expected); }
+
+        /* ── VERIFICATION WIDGET ── */
+        .verify-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verify-section::after {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: var(--accent-green);
+            filter: blur(80px);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .section-title i { color: var(--accent-green); }
+
+        .section-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+        .verify-form {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .verify-input-group { flex: 1; }
+        .verify-input-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .verify-input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .verify-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+        }
+
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(138,150,179,0.5);
+            font-size: 0.9rem;
+        }
+
+        .verify-btn {
+            padding: 0.9rem 1.8rem;
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid rgba(0, 255, 136, 0.35);
+            color: var(--accent-green);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .verify-btn:hover {
+            background: var(--accent-green);
+            color: #0b0f19;
+            box-shadow: 0 8px 20px var(--accent-green-glow);
+        }
+
+        /* Verification Result Banner */
+        .verify-result {
+            margin-top: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .verify-result.success {
+            display: flex;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.25);
+        }
+
+        .verify-result.error {
+            display: flex;
+            background: rgba(255, 80, 80, 0.08);
+            border: 1px solid rgba(255, 80, 80, 0.25);
+        }
+
+        .result-icon { font-size: 1.4rem; }
+        .result-text h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.2rem; }
+        .result-text p { font-size: 0.82rem; color: var(--text-muted); }
+        .result-meta { margin-left: auto; font-size: 0.82rem; color: var(--text-muted); text-align: right; }
+        .result-meta strong { color: var(--accent-green); display: block; font-size: 1.1rem; font-weight: 800; }
+
+        /* ── RESERVATIONS TABLE ── */
+        .reservations-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .table-search {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .search-input {
+            padding: 0.6rem 1rem 0.6rem 2.4rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            width: 240px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus { outline: none; border-color: rgba(0,255,136,0.4); }
+
+        .filter-tabs { display: flex; gap: 0.4rem; }
+
+        .filter-tab {
+            padding: 0.4rem 0.9rem;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active, .filter-tab:hover {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.25);
+            color: var(--accent-green);
+        }
+
+        /* Table */
+        .res-table { width: 100%; border-collapse: collapse; }
+
+        .res-table thead th {
+            padding: 0.9rem 2rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(0,0,0,0.1);
+        }
+
+        .res-table tbody tr {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s;
+        }
+
+        .res-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .res-table tbody tr:last-child { border-bottom: none; }
+
+        .res-table td { padding: 1.1rem 2rem; font-size: 0.88rem; color: var(--text-light); vertical-align: middle; }
+
+        .booking-id {
+            font-family: monospace;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+        }
+
+        .user-cell { display: flex; align-items: center; gap: 0.7rem; }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .user-name { font-weight: 600; font-size: 0.88rem; }
+        .user-email { font-size: 0.75rem; color: var(--text-muted); }
+
+        .plate-badge {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            background: rgba(0, 243, 255, 0.08);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            color: var(--accent-cyan);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            letter-spacing: 0.08em;
+        }
+
+        .spot-badge {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        .spot-badge .spot-zone {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .time-cell { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+        .time-cell strong { color: var(--text-light); font-size: 0.88rem; }
+
+        /* Status Badges & Buttons */
+        .status-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1.5px solid;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .status-expected {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: var(--status-expected);
+        }
+
+        .status-expected:hover {
+            background: rgba(245, 158, 11, 0.25);
+            transform: scale(1.03);
+        }
+
+        .status-arrived {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.35);
+            color: var(--accent-green);
+        }
+
+        .status-arrived:hover {
+            background: rgba(0, 255, 136, 0.22);
+            transform: scale(1.03);
+        }
+
+        .status-completed {
+            background: rgba(138, 150, 179, 0.1);
+            border-color: rgba(138, 150, 179, 0.2);
+            color: var(--status-completed);
+            cursor: default;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-expected .status-dot { animation: pulse-yellow 1.5s infinite; }
+        .status-arrived .status-dot  { animation: pulse-green 1.5s infinite; }
+
+        @keyframes pulse-yellow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.6); }
+            50%       { box-shadow: 0 0 0 4px rgba(245,158,11,0); }
+        }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.6); }
+            50%       { box-shadow: 0 0 0 4px rgba(0,255,136,0); }
+        }
+
+        /* Actions column */
+        .action-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            padding: 0.4rem 0.7rem;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.3);
+            color: var(--accent-green);
+        }
+
+        .table-footer {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* ── TOAST NOTIFICATION ── */
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .toast {
+            background: rgba(15, 20, 35, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,255,136,0.25);
+            border-left: 3px solid var(--accent-green);
+            border-radius: 10px;
+            padding: 1rem 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.88rem;
+            color: var(--text-light);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: slideInRight 0.3s ease;
+            min-width: 280px;
+        }
+
+        .toast i { color: var(--accent-green); font-size: 1rem; }
+        .toast.error-toast { border-left-color: #ff6b6b; }
+        .toast.error-toast i { color: #ff6b6b; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to   { transform: translateX(0);   opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0);   opacity: 1; }
+            to   { transform: translateX(120%); opacity: 0; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .stats-row { grid-template-columns: repeat(2,1fr); }
+            .sidebar { display: none; }
+            .verify-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAV -->
+    <nav class="dash-nav">
+        <div class="nav-brand">
+            <a class="logo" href="index.html">Park<span>N</span>Go</a>
+            <div class="module-pill"><i class="fa-solid fa-bookmark"></i> Reserved Module</div>
+        </div>
+        <div class="nav-right">
+            <div id="liveClock" class="nav-clock">--:--:--</div>
+            <div class="nav-staff">
+                <div class="staff-avatar">AG</div>
+                <div>
+                    <div style="color:var(--text-light); font-weight:600; font-size:0.88rem;">Admin Guard</div>
+                    <div style="font-size:0.75rem;">STF-00124</div>
+                </div>
+            </div>
+            <a href="login.html" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </nav>
+
+    <!-- LAYOUT -->
+    <div class="dash-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <span class="sidebar-label">Overview</span>
+            <button class="sidebar-item active" onclick="showView('reservations')">
+                <i class="fa-solid fa-list-check"></i> All Reservations
+                <span class="badge" id="sidebarTotalCount">7</span>
+            </button>
+            <button class="sidebar-item" onclick="showView('reservations'); filterByStatus('Expected')">
+                <i class="fa-solid fa-clock"></i> Expected
+                <span class="badge" id="sidebarExpectedCount">3</span>
+            </button>
+            <button class="sidebar-item" onclick="showView('reservations'); filterByStatus('Arrived')">
+                <i class="fa-solid fa-circle-check"></i> Arrived
+            </button>
+            <button class="sidebar-item" onclick="showView('reservations'); filterByStatus('Completed')">
+                <i class="fa-solid fa-flag-checkered"></i> Completed
+            </button>
+
+            <span class="sidebar-label">Tools</span>
+            <button class="sidebar-item" onclick="openVerify()">
+                <i class="fa-solid fa-magnifying-glass"></i> Verify Booking
+            </button>
+            <button class="sidebar-item" onclick="showToast('Spot map coming soon!', false)">
+                <i class="fa-solid fa-map"></i> Spot Map
+            </button>
+
+            <span class="sidebar-label">Reports</span>
+            <button class="sidebar-item" onclick="showToast('Generating daily report...', false)">
+                <i class="fa-solid fa-file-lines"></i> Daily Report
+            </button>
+            <button class="sidebar-item" onclick="showToast('Export CSV coming soon!', false)">
+                <i class="fa-solid fa-download"></i> Export CSV
+            </button>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="dash-main">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Reserved <span>Booking</span> Dashboard</h1>
+                    <p>Monitor, verify, and manage all pre-booked parking slots in real-time.</p>
+                </div>
+                <div class="header-date" id="headerDate">--</div>
+            </div>
+
+            <!-- STAT CARDS -->
+            <div class="stats-row">
+                <div class="stat-card" style="--card-accent: var(--accent-cyan);">
+                    <div class="stat-icon" style="background: rgba(0,243,255,0.1); color: var(--accent-cyan);">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-delta delta-up">+2 today</div>
+                    <div class="stat-value" id="statTotal">7</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card" style="--card-accent: var(--status-expected);">
+                    <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--status-expected);">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-delta delta-warn">Awaiting</div>
+                    <div class="stat-value" id="statExpected">3</div>
+                    <div class="stat-label">Expected</div>
+                </div>
+                <div class="stat-card" style="--card-accent: var(--accent-green);">
+                    <div class="stat-icon" style="background: rgba(0,255,136,0.1); color: var(--accent-green);">
+                        <i class="fa-solid fa-square-parking"></i>
+                    </div>
+                    <div class="stat-delta delta-up">Active</div>
+                    <div class="stat-value" id="statArrived">2</div>
+                    <div class="stat-label">Parked (Arrived)</div>
+                </div>
+                <div class="stat-card" style="--card-accent: var(--text-muted);">
+                    <div class="stat-icon" style="background: rgba(138,150,179,0.1); color: var(--text-muted);">
+                        <i class="fa-solid fa-flag-checkered"></i>
+                    </div>
+                    <div class="stat-delta delta-up" style="background:rgba(138,150,179,0.1);color:var(--text-muted);">Done</div>
+                    <div class="stat-value" id="statCompleted">2</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+
+            <!-- VERIFICATION WIDGET -->
+            <div class="verify-section" id="verifySection">
+                <div class="section-title"><i class="fa-solid fa-magnifying-glass-check"></i> Quick Spot Verification</div>
+                <div class="section-sub">Enter a Booking ID or Vehicle License Plate to instantly verify a reservation.</div>
+                <div class="verify-form">
+                    <div class="verify-input-group">
+                        <label>Booking ID</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input type="text" class="verify-input" id="verifyBookingId" placeholder="e.g. RES-2024-001">
+                        </div>
+                    </div>
+                    <div class="verify-input-group">
+                        <label>License Plate</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-car"></i>
+                            <input type="text" class="verify-input" id="verifyPlate" placeholder="e.g. MH01AB1234">
+                        </div>
+                    </div>
+                    <button class="verify-btn" onclick="verifyBooking()">
+                        <i class="fa-solid fa-bolt"></i> Verify Now
+                    </button>
+                </div>
+                <div class="verify-result" id="verifyResult"></div>
+            </div>
+
+            <!-- RESERVATIONS TABLE -->
+            <div class="reservations-section">
+                <div class="table-header">
+                    <div class="section-title" style="margin-bottom:0;"><i class="fa-solid fa-table-list"></i> Reservations List</div>
+                    <div class="table-search">
+                        <div class="search-wrap">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" class="search-input" id="globalSearch" placeholder="Search name, plate, spot..." oninput="renderTable()">
+                        </div>
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" id="tab-All" onclick="setFilter('All')">All</button>
+                            <button class="filter-tab" id="tab-Expected" onclick="setFilter('Expected')">Expected</button>
+                            <button class="filter-tab" id="tab-Arrived" onclick="setFilter('Arrived')">Arrived</button>
+                            <button class="filter-tab" id="tab-Completed" onclick="setFilter('Completed')">Completed</button>
+                        </div>
+                    </div>
+                </div>
+                <table class="res-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>User</th>
+                            <th>License Plate</th>
+                            <th>Spot</th>
+                            <th>Time Slot</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationTableBody"></tbody>
+                </table>
+                <div class="table-footer">
+                    <span id="tableFooterInfo">Showing all reservations</span>
+                    <span id="tableFooterTime">Last updated: just now</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+<script>
+    // ── DATA ──────────────────────────────────────────────────────────────────
+    const reservations = [
+        {
+            id: 'RES-2024-001', name: 'Rohan Mehta', email: 'rohan.m@email.com',
+            plate: 'MH01AB1234', spot: 'A-12', zone: 'Zone A — Ground',
+            from: '10:00 AM', to: '01:00 PM', date: 'Apr 9, 2026',
+            status: 'Arrived', avatarColor: '#6c63ff'
+        },
+        {
+            id: 'RES-2024-002', name: 'Priya Sharma', email: 'priya.s@email.com',
+            plate: 'MH02CD5678', spot: 'B-05', zone: 'Zone B — Level 1',
+            from: '11:30 AM', to: '02:30 PM', date: 'Apr 9, 2026',
+            status: 'Expected', avatarColor: '#e91e8c'
+        },
+        {
+            id: 'RES-2024-003', name: 'Arjun Nair', email: 'arjun.n@email.com',
+            plate: 'KA03EF9012', spot: 'A-07', zone: 'Zone A — Ground',
+            from: '09:00 AM', to: '11:00 AM', date: 'Apr 9, 2026',
+            status: 'Completed', avatarColor: '#00bcd4'
+        },
+        {
+            id: 'RES-2024-004', name: 'Sneha Patel', email: 'sneha.p@email.com',
+            plate: 'GJ05GH3456', spot: 'C-03', zone: 'Zone C — Covered',
+            from: '12:00 PM', to: '03:00 PM', date: 'Apr 9, 2026',
+            status: 'Expected', avatarColor: '#ff9800'
+        },
+        {
+            id: 'RES-2024-005', name: 'Vikram Iyer', email: 'vikram.i@email.com',
+            plate: 'TN09IJ7890', spot: 'B-11', zone: 'Zone B — Level 1',
+            from: '02:00 PM', to: '05:00 PM', date: 'Apr 9, 2026',
+            status: 'Expected', avatarColor: '#4caf50'
+        },
+        {
+            id: 'RES-2024-006', name: 'Meera Joshi', email: 'meera.j@email.com',
+            plate: 'DL10KL2345', spot: 'A-02', zone: 'Zone A — Ground',
+            from: '08:00 AM', to: '10:30 AM', date: 'Apr 9, 2026',
+            status: 'Completed', avatarColor: '#9c27b0'
+        },
+        {
+            id: 'RES-2024-007', name: 'Karan Malhotra', email: 'karan.m@email.com',
+            plate: 'RJ14MN6789', spot: 'C-08', zone: 'Zone C — Covered',
+            from: '01:00 PM', to: '04:00 PM', date: 'Apr 9, 2026',
+            status: 'Arrived', avatarColor: '#f44336'
+        }
+    ];
+
+    let currentFilter = 'All';
+
+    // ── CLOCK & DATE ─────────────────────────────────────────────────────────
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-IN', { hour12: false });
+        document.getElementById('liveClock').textContent = time;
+        document.getElementById('headerDate').innerHTML =
+            `<div>${now.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</div>
+             <div style="margin-top:0.2rem;">${time}</div>`;
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('tableFooterTime').textContent = `Last updated: ${now.getHours()}:${mins}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── STATS UPDATE ─────────────────────────────────────────────────────────
+    function updateStats() {
+        const total      = reservations.length;
+        const expected   = reservations.filter(r => r.status === 'Expected').length;
+        const arrived    = reservations.filter(r => r.status === 'Arrived').length;
+        const completed  = reservations.filter(r => r.status === 'Completed').length;
+        document.getElementById('statTotal').textContent     = total;
+        document.getElementById('statExpected').textContent  = expected;
+        document.getElementById('statArrived').textContent   = arrived;
+        document.getElementById('statCompleted').textContent = completed;
+        document.getElementById('sidebarTotalCount').textContent    = total;
+        document.getElementById('sidebarExpectedCount').textContent = expected;
+    }
+
+    // ── STATUS CYCLE ─────────────────────────────────────────────────────────
+    const statusCycle = { 'Expected': 'Arrived', 'Arrived': 'Completed' };
+
+    function cycleStatus(id) {
+        const res = reservations.find(r => r.id === id);
+        if (!res || res.status === 'Completed') return;
+
+        const oldStatus = res.status;
+        const newStatus = statusCycle[oldStatus];
+        res.status = newStatus;
+
+        const msg = newStatus === 'Arrived'
+            ? `✅ ${res.name}'s vehicle marked as Arrived at Spot ${res.spot}`
+            : `🏁 Booking ${res.id} completed successfully`;
+        showToast(msg, true);
+        renderTable();
+        updateStats();
+    }
+
+    // ── RENDER TABLE ─────────────────────────────────────────────────────────
+    function renderTable() {
+        const search = (document.getElementById('globalSearch').value || '').toLowerCase();
+        const tbody  = document.getElementById('reservationTableBody');
+
+        const filtered = reservations.filter(r => {
+            const matchFilter = currentFilter === 'All' || r.status === currentFilter;
+            const matchSearch = !search || [r.id, r.name, r.plate, r.spot, r.email]
+                .some(v => v.toLowerCase().includes(search));
+            return matchFilter && matchSearch;
+        });
+
+        document.getElementById('tableFooterInfo').textContent =
+            `Showing ${filtered.length} of ${reservations.length} reservations`;
+
+        if (!filtered.length) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">
+                <i class="fa-solid fa-magnifying-glass" style="font-size:2rem;margin-bottom:1rem;display:block;opacity:0.3;"></i>
+                No reservations found
+            </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(r => {
+            const initials = r.name.split(' ').map(w => w[0]).join('');
+            const statusClass = {
+                Expected: 'status-expected',
+                Arrived:  'status-arrived',
+                Completed:'status-completed'
+            }[r.status];
+            const statusIcon = {
+                Expected: 'fa-clock',
+                Arrived:  'fa-circle-check',
+                Completed:'fa-flag-checkered'
+            }[r.status];
+            const actionLabel = statusCycle[r.status] ? `Mark ${statusCycle[r.status]}` : '';
+
+            return `
+            <tr>
+                <td><span class="booking-id">${r.id}</span></td>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar" style="background:${r.avatarColor}22;color:${r.avatarColor};">${initials}</div>
+                        <div>
+                            <div class="user-name">${r.name}</div>
+                            <div class="user-email">${r.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="plate-badge">${r.plate}</span></td>
+                <td>
+                    <div class="spot-badge">${r.spot}</div>
+                    <div class="spot-zone">${r.zone}</div>
+                </td>
+                <td class="time-cell">
+                    <strong>${r.from} – ${r.to}</strong><br>${r.date}
+                </td>
+                <td>
+                    <button class="status-btn ${statusClass}" onclick="${r.status !== 'Completed' ? `cycleStatus('${r.id}')` : ''}" ${r.status === 'Completed' ? 'disabled style="cursor:default;"' : ''}>
+                        <span class="status-dot"></span>
+                        <i class="fa-solid ${statusIcon}"></i> ${r.status}
+                    </button>
+                </td>
+                <td>
+                    ${actionLabel ? `<button class="action-btn" onclick="cycleStatus('${r.id}')"><i class="fa-solid fa-arrow-right"></i> ${actionLabel}</button>` : '<span style="color:var(--text-muted);font-size:0.8rem;">—</span>'}
+                    <button class="action-btn" style="margin-left:0.4rem;" onclick="showToast('Details modal coming soon!', false)"><i class="fa-solid fa-eye"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── FILTER ───────────────────────────────────────────────────────────────
+    function setFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        const tab = document.getElementById('tab-' + filter);
+        if (tab) tab.classList.add('active');
+        renderTable();
+    }
+
+    function filterByStatus(status) {
+        setFilter(status);
+    }
+
+    // ── VERIFY BOOKING ────────────────────────────────────────────────────────
+    function verifyBooking() {
+        const idInput    = document.getElementById('verifyBookingId').value.trim().toUpperCase();
+        const plateInput = document.getElementById('verifyPlate').value.trim().toUpperCase();
+        const resultEl   = document.getElementById('verifyResult');
+
+        if (!idInput && !plateInput) {
+            showToast('Please enter a Booking ID or License Plate.', false);
+            return;
+        }
+
+        const found = reservations.find(r =>
+            (idInput && r.id.toUpperCase() === idInput) ||
+            (plateInput && r.plate.toUpperCase().replace(/\s/g, '') === plateInput.replace(/\s/g, ''))
+        );
+
+        if (found) {
+            const statusColor = { Expected:'var(--status-expected)', Arrived:'var(--accent-green)', Completed:'var(--text-muted)' }[found.status];
+            resultEl.className = 'verify-result success';
+            resultEl.innerHTML = `
+                <div class="result-icon" style="color:var(--accent-green)"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="result-text">
+                    <h4>Booking Verified — ${found.name}</h4>
+                    <p>Plate: <strong style="color:var(--accent-cyan)">${found.plate}</strong> &nbsp;|&nbsp; Spot: <strong>${found.spot}</strong> &nbsp;|&nbsp; ${found.zone}</p>
+                    <p style="margin-top:0.3rem;">Time: ${found.from} – ${found.to} on ${found.date}</p>
+                </div>
+                <div class="result-meta">
+                    <strong style="color:${statusColor}">${found.status}</strong>
+                    ${found.status !== 'Completed' ? `<button class="verify-btn" style="margin-top:0.5rem;padding:0.5rem 0.9rem;font-size:0.82rem;" onclick="cycleStatus('${found.id}')">→ Mark ${statusCycle[found.status]}</button>` : ''}
+                </div>`;
+            showToast(`Booking ${found.id} verified successfully!`, true);
+        } else {
+            resultEl.className = 'verify-result error';
+            resultEl.innerHTML = `
+                <div class="result-icon" style="color:#ff6b6b"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div class="result-text">
+                    <h4 style="color:#ff6b6b;">No Booking Found</h4>
+                    <p>No reservation matches the provided Booking ID or License Plate. Please double-check the entry.</p>
+                </div>`;
+            showToast('Booking not found. Check the ID or plate.', false);
+        }
+    }
+
+    // ── TOAST ─────────────────────────────────────────────────────────────────
+    function showToast(msg, success = true) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast' + (success ? '' : ' error-toast');
+        toast.innerHTML = `<i class="fa-solid ${success ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // ── SIDEBAR NAV ───────────────────────────────────────────────────────────
+    function showView(view) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function openVerify() {
+        document.getElementById('verifySection').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('verifyBookingId').focus();
+        showView('verify');
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+    renderTable();
+    updateStats();
+
+    // Allow Enter key to trigger verify
+    ['verifyBookingId', 'verifyPlate'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', e => {
+            if (e.key === 'Enter') verifyBooking();
+        });
+    });
+</script>
+</body>
+</html>
