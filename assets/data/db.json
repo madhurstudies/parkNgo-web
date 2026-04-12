@@ -16,6 +16,21 @@
         "reservedPrice": 60.00,
         "cabDriverPrice": 32.00
       }
+    },
+    "tester@gmail.com": {
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "setupComplete": true,
+      "createdAt": "2026-04-12T00:00:00Z",
+      "settings": {
+        "parkingName": "Test Environment Hub",
+        "totalSlots": 100,
+        "reservedMode": "amount",
+        "reservedValue": 20,
+        "reservedSlots": 20,
+        "onSpotPrice": 50.00,
+        "reservedPrice": 80.00,
+        "cabDriverPrice": 40.00
+      }
     }
   }
 }

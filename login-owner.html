@@ -273,6 +273,7 @@
                         <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
                     </div>
                     <button type="submit" class="auth-btn" id="loginBtn">Sign In to Dashboard</button>
+                    <button type="button" class="auth-btn" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); margin-top: 0.5rem;" onclick="loginAsTester()">Login as Tester</button>
                 </form>
                 <div class="auth-footer">
                     <p>Don't have an owner account? <a onclick="switchTab('register')">Register here</a></p>
@@ -431,6 +432,36 @@
             } else {
                 window.location.href = 'owner-setup.html';
             }
+        }
+
+        async function loginAsTester() {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<span class="spinner"></span> Preparing Tester...';
+            
+            const owners = getOwners();
+            if (!owners['tester@gmail.com']) {
+                const hash = await hashPassword('123456');
+                owners['tester@gmail.com'] = {
+                    passwordHash: hash,
+                    setupComplete: true,
+                    createdAt: new Date().toISOString(),
+                    settings: {
+                        parkingName: "Test Environment Hub",
+                        totalSlots: 100,
+                        reservedMode: "amount",
+                        reservedValue: 20,
+                        reservedSlots: 20,
+                        onSpotPrice: 50.00,
+                        reservedPrice: 80.00,
+                        cabDriverPrice: 40.00
+                    }
+                };
+                saveOwners(owners);
+            }
+            
+            document.getElementById('loginEmail').value = 'tester@gmail.com';
+            document.getElementById('loginPassword').value = '123456';
+            document.getElementById('loginBtn').click();
         }
 
         // ==============================

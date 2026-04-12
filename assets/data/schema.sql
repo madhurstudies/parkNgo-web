@@ -57,6 +57,22 @@ BEGIN
 END;
 
 -- ============================================
+-- parking_history
+-- Stores completed parking sessions and revenue
+-- ============================================
+CREATE TABLE IF NOT EXISTS parking_history (
+    history_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner_id        INTEGER NOT NULL,
+    slot_id         INTEGER NOT NULL,
+    vehicle_type    VARCHAR(50) NOT NULL CHECK(vehicle_type IN ('Normal', 'Taxi')),
+    check_in_time   DATETIME NOT NULL,
+    check_out_time  DATETIME NOT NULL,
+    elapsed_hours   REAL NOT NULL,
+    total_revenue   REAL NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES owners(owner_id) ON DELETE CASCADE
+);
+
+-- ============================================
 -- Sample Data (for testing / seeding)
 -- ============================================
 -- Password for demo: "12345678" → SHA-256 hash below
