@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your Parking Space - parkNgo</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--primary-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== TOP BAR ========== */
+        .setup-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(11, 15, 25, 0.6);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .png-logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        .png-logo span { color: var(--accent-cyan); }
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .topbar-user i {
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        /* ========== MAIN WRAPPER ========== */
+        .setup-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 2rem 5rem;
+        }
+
+        /* ========== PROGRESS STEPPER ========== */
+        .stepper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 3rem;
+        }
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-muted);
+            background: transparent;
+            transition: all 0.4s ease;
+        }
+        .step-circle.active {
+            border-color: var(--accent-purple);
+            color: var(--text-light);
+            background: rgba(157, 78, 221, 0.2);
+            box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+        }
+        .step-circle.done {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+        }
+        .step-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .step-item.active .step-label { color: var(--text-light); }
+        .step-item.done .step-label { color: #00ff88; }
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 0.5rem;
+            transition: background 0.4s ease;
+        }
+        .step-line.done {
+            background: linear-gradient(90deg, #00ff88, var(--accent-purple));
+        }
+
+        /* ========== CARDS (STEPS) ========== */
+        .setup-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: fadeSlideIn 0.45s ease;
+        }
+        .setup-card.active { display: block; }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            color: var(--text-light);
+        }
+        .card-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* ========== FORM FIELDS ========== */
+        .field {
+            margin-bottom: 1.5rem;
+        }
+        .field label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+        .field label .hint {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .field input[type="text"],
+        .field input[type="number"] {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.25);
+        }
+        .field input::placeholder {
+            color: rgba(138, 150, 179, 0.5);
+        }
+
+        /* Toggle switch for percentage / amount */
+        .toggle-group {
+            display: flex;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+        .toggle-option {
+            flex: 1;
+            padding: 0.7rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .toggle-option.active {
+            background: var(--accent-purple);
+            color: var(--text-light);
+        }
+        .toggle-option:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Computed info box */
+        .info-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0, 243, 255, 0.06);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 0.8rem;
+        }
+        .info-box i {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+        .info-box span {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Pricing display */
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .price-row .price-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .price-row .price-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+        }
+        .price-row.discount {
+            border-color: rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.04);
+        }
+        .price-row.discount .price-value {
+            color: #00ff88;
+        }
+        .discount-badge {
+            font-size: 0.7rem;
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn-next, .btn-prev, .btn-finish {
+            padding: 0.9rem 2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-next {
+            background: var(--accent-purple);
+            color: var(--text-light);
+            margin-left: auto;
+        }
+        .btn-next:hover {
+            background: #843bba;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(157, 78, 221, 0.3);
+        }
+        .btn-prev {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+        }
+        .btn-prev:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-light);
+        }
+        .btn-finish {
+            background: linear-gradient(135deg, #00ff88, var(--accent-cyan));
+            color: var(--primary-color);
+            margin-left: auto;
+        }
+        .btn-finish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        }
+        .btn-finish:disabled,
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ========== SUMMARY PANEL ========== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .summary-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+        .summary-item .s-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+        .summary-item .s-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .summary-item.highlight .s-value { color: var(--accent-cyan); }
+        .summary-item.green .s-value { color: #00ff88; }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: inherit;
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 380px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast-error {
+            background: rgba(255, 50, 50, 0.15);
+            border: 1px solid rgba(255, 50, 50, 0.4);
+            color: #ff6b6b;
+        }
+        .toast-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Glow circles */
+        .bg-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            filter: blur(150px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .setup-wrapper { padding: 2rem 1rem 3rem; }
+            .setup-card { padding: 1.8rem; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .stepper { gap: 0; }
+            .step-label { display: none; }
+            .step-line { width: 30px; }
+            .setup-topbar { padding: 1rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background glow -->
+    <div class="bg-glow" style="background: var(--accent-purple); top: -10%; left: -5%; opacity: 0.25;"></div>
+    <div class="bg-glow" style="background: var(--accent-cyan); bottom: -15%; right: -10%; opacity: 0.15;"></div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Top bar -->
+    <div class="setup-topbar">
+        <a href="index.html" class="png-logo">P<span>n</span>G</a>
+        <div class="topbar-user">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="userEmail">owner@email.com</span>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="setup-wrapper">
+
+        <!-- Progress Stepper -->
+        <div class="stepper">
+            <div class="step-item active" id="stepItem1">
+                <div class="step-circle active" id="stepCircle1">1</div>
+                <span class="step-label">Space</span>
+            </div>
+            <div class="step-line" id="stepLine1"></div>
+            <div class="step-item" id="stepItem2">
+                <div class="step-circle" id="stepCircle2">2</div>
+                <span class="step-label">Slots</span>
+            </div>
+            <div class="step-line" id="stepLine2"></div>
+            <div class="step-item" id="stepItem3">
+                <div class="step-circle" id="stepCircle3">3</div>
+                <span class="step-label">Pricing</span>
+            </div>
+            <div class="step-line" id="stepLine3"></div>
+            <div class="step-item" id="stepItem4">
+                <div class="step-circle" id="stepCircle4"><i class="fa-solid fa-check" style="font-size: 0.75rem;"></i></div>
+                <span class="step-label">Confirm</span>
+            </div>
+        </div>
+
+        <!-- =============== STEP 1: PARKING SPACE =============== -->
+        <div class="setup-card active" id="step1">
+            <h2 class="card-title">Name Your Parking Space</h2>
+            <p class="card-subtitle">Give your parking area a recognizable name and enter the total number of parking slots available.</p>
+            <div class="field">
+                <label>Parking Space Name</label>
+                <input type="text" id="parkingName" placeholder="e.g. Downtown Parking Hub" required>
+            </div>
+            <div class="field">
+                <label>Total Number of Slots</label>
+                <input type="number" id="totalSlots" placeholder="e.g. 50" min="1" required>
+            </div>
+            <div class="btn-row">
+                <button class="btn-next" onclick="goToStep(2)">Continue <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- =============== STEP 2: RESERVED SLOTS =============== -->
+        <div class="setup-card" id="step2">
+            <h2 class="card-title">Reserve Your Slots</h2>
+            <p class="card-subtitle">Decide how many slots to keep reserved for pre-booked customers. You can enter this as a percentage of total slots or a fixed number.</p>
+
+            <div class="toggle-group">
+                <button class="toggle-option active" id="togglePercent" onclick="setReservedMode('percentage')">
+                    <i class="fa-solid fa-percent"></i> Percentage
+                </button>
+                <button class="toggle-option" id="toggleAmount" onclick="setReservedMode('amount')">
+                    <i class="fa-solid fa-hashtag"></i> Fixed Number
+                </button>
+            </div>
+
+            <div class="field">
+                <label id="reservedLabel">Reserved Slots (%)</label>
+                <input type="number" id="reservedValue" placeholder="e.g. 20" min="0" oninput="updateReservedInfo()">
+            </div>
+
+            <div class="info-box" id="reservedInfo">
+                <i class="fa-solid fa-circle-info"></i>
+                <span id="reservedInfoText">Enter a value to see computed slots</span>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-prev" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn-next" onclick="goToStep(3)">Continue <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- =============== STEP 3: PRICING =============== -->
+        <div class="setup-card" id="step3">
+            <h2 class="card-title">Set Your Pricing</h2>
+            <p class="card-subtitle">Define per-hour rates. Registered cab drivers (Ola/Uber) automatically receive a <strong>20% discount</strong> on the on-spot price.</p>
+
+            <div class="field">
+                <label>On-Spot Hourly Price <span class="hint">(₹ per hour)</span></label>
+                <input type="number" id="onSpotPrice" placeholder="e.g. 40" min="0" step="0.01" oninput="updateCabPrice()">
+            </div>
+            <div class="field">
+                <label>Reserved Hourly Price <span class="hint">(₹ per hour)</span></label>
+                <input type="number" id="reservedPrice" placeholder="e.g. 60" min="0" step="0.01">
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <div class="price-row discount">
+                    <div>
+                        <span class="price-label">Cab Driver Price</span>
+                        <span class="discount-badge">20% OFF</span>
+                    </div>
+                    <span class="price-value" id="cabPriceDisplay">₹ 0.00 / hr</span>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 1rem; border-color: rgba(0, 255, 136, 0.15); background: rgba(0, 255, 136, 0.04);">
+                <i class="fa-solid fa-tag" style="color: #00ff88;"></i>
+                <span style="color: #00ff88;">Cab driver price is auto-calculated: On-Spot × 0.80</span>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-prev" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn-next" onclick="goToStep(4)">Review & Confirm <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- =============== STEP 4: CONFIRM =============== -->
+        <div class="setup-card" id="step4">
+            <h2 class="card-title">Review Your Setup</h2>
+            <p class="card-subtitle">Double-check everything before saving. You can always change these later from your dashboard.</p>
+
+            <div class="summary-grid" id="summaryGrid">
+                <!-- Filled by JS -->
+            </div>
+
+            <div class="btn-row" style="margin-top: 2rem;">
+                <button class="btn-prev" onclick="goToStep(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn-finish" id="finishBtn" onclick="finishSetup()"><i class="fa-solid fa-rocket"></i> Save & Launch Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================
+        // SESSION CHECK
+        // ==============================
+        const currentOwner = sessionStorage.getItem('currentOwner');
+        if (!currentOwner) {
+            window.location.href = 'login-owner.html';
+        }
+        document.getElementById('userEmail').textContent = currentOwner || '';
+
+        // Check if already set up
+        const DB_KEY = 'parkNgo_owners';
+        function getOwners() { return JSON.parse(localStorage.getItem(DB_KEY) || '{}'); }
+        function saveOwners(o) { localStorage.setItem(DB_KEY, JSON.stringify(o)); }
+
+        (function checkSetupStatus() {
+            const owners = getOwners();
+            const owner = owners[currentOwner];
+            if (owner && owner.setupComplete) {
+                // Already set up — redirect to dashboard
+                window.location.href = 'owner-dashboard.html';
+            }
+        })();
+
+        // ==============================
+        // STEPPER LOGIC
+        // ==============================
+        let currentStep = 1;
+        const totalSteps = 4;
+        let reservedMode = 'percentage';
+
+        function goToStep(step) {
+            // Validate current step before proceeding forward
+            if (step > currentStep && !validateStep(currentStep)) return;
+
+            // Update cards
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById('step' + i).classList.toggle('active', i === step);
+            }
+
+            // Update stepper visuals
+            for (let i = 1; i <= totalSteps; i++) {
+                const item = document.getElementById('stepItem' + i);
+                const circle = document.getElementById('stepCircle' + i);
+                item.className = 'step-item';
+                circle.className = 'step-circle';
+
+                if (i < step) {
+                    item.classList.add('done');
+                    circle.classList.add('done');
+                    circle.innerHTML = '<i class="fa-solid fa-check" style="font-size: 0.75rem;"></i>';
+                } else if (i === step) {
+                    item.classList.add('active');
+                    circle.classList.add('active');
+                    if (i < totalSteps) circle.textContent = i;
+                    else circle.innerHTML = '<i class="fa-solid fa-check" style="font-size: 0.75rem;"></i>';
+                } else {
+                    if (i < totalSteps) circle.textContent = i;
+                    else circle.innerHTML = '<i class="fa-solid fa-check" style="font-size: 0.75rem;"></i>';
+                }
+            }
+
+            // Update step lines
+            for (let i = 1; i < totalSteps; i++) {
+                const line = document.getElementById('stepLine' + i);
+                line.classList.toggle('done', i < step);
+            }
+
+            currentStep = step;
+
+            // If step 4 (summary), populate it
+            if (step === 4) populateSummary();
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const name = document.getElementById('parkingName').value.trim();
+                const slots = document.getElementById('totalSlots').value;
+                if (!name) { showToast('Please enter a parking space name.'); return false; }
+                if (!slots || parseInt(slots) < 1) { showToast('Enter a valid number of slots (at least 1).'); return false; }
+                return true;
+            }
+            if (step === 2) {
+                const val = document.getElementById('reservedValue').value;
+                const total = parseInt(document.getElementById('totalSlots').value);
+                if (!val || parseFloat(val) < 0) { showToast('Enter a valid reserved value.'); return false; }
+                if (reservedMode === 'percentage' && parseFloat(val) > 100) { showToast('Percentage cannot exceed 100%.'); return false; }
+                if (reservedMode === 'amount' && parseInt(val) > total) { showToast('Reserved slots cannot exceed total slots.'); return false; }
+                return true;
+            }
+            if (step === 3) {
+                const onSpot = document.getElementById('onSpotPrice').value;
+                const reserved = document.getElementById('reservedPrice').value;
+                if (!onSpot || parseFloat(onSpot) < 0) { showToast('Enter a valid on-spot price.'); return false; }
+                if (!reserved || parseFloat(reserved) < 0) { showToast('Enter a valid reserved price.'); return false; }
+                return true;
+            }
+            return true;
+        }
+
+        // ==============================
+        // RESERVED MODE TOGGLE
+        // ==============================
+        function setReservedMode(mode) {
+            reservedMode = mode;
+            document.getElementById('togglePercent').classList.toggle('active', mode === 'percentage');
+            document.getElementById('toggleAmount').classList.toggle('active', mode === 'amount');
+            document.getElementById('reservedLabel').textContent = mode === 'percentage' ? 'Reserved Slots (%)' : 'Reserved Slots (Fixed Number)';
+            document.getElementById('reservedValue').placeholder = mode === 'percentage' ? 'e.g. 20' : 'e.g. 10';
+            updateReservedInfo();
+        }
+
+        function updateReservedInfo() {
+            const val = parseFloat(document.getElementById('reservedValue').value);
+            const total = parseInt(document.getElementById('totalSlots').value) || 0;
+            const infoText = document.getElementById('reservedInfoText');
+
+            if (isNaN(val) || val < 0) {
+                infoText.textContent = 'Enter a value to see computed slots';
+                return;
+            }
+
+            if (reservedMode === 'percentage') {
+                const computed = Math.round((val / 100) * total);
+                infoText.textContent = `${val}% of ${total} total slots = ${computed} reserved slots, ${total - computed} on-spot`;
+            } else {
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                infoText.textContent = `${val} reserved out of ${total} total = ${pct}% reserved, ${total - val} on-spot`;
+            }
+        }
+
+        function getComputedReservedSlots() {
+            const val = parseFloat(document.getElementById('reservedValue').value) || 0;
+            const total = parseInt(document.getElementById('totalSlots').value) || 0;
+            if (reservedMode === 'percentage') return Math.round((val / 100) * total);
+            return Math.min(parseInt(val), total);
+        }
+
+        // ==============================
+        // CAB DRIVER PRICE (20% OFF)
+        // ==============================
+        function updateCabPrice() {
+            const onSpot = parseFloat(document.getElementById('onSpotPrice').value) || 0;
+            const cabPrice = (onSpot * 0.80).toFixed(2);
+            document.getElementById('cabPriceDisplay').textContent = `₹ ${cabPrice} / hr`;
+        }
+
+        // ==============================
+        // SUMMARY
+        // ==============================
+        function populateSummary() {
+            const name = document.getElementById('parkingName').value.trim();
+            const total = parseInt(document.getElementById('totalSlots').value);
+            const resSlots = getComputedReservedSlots();
+            const onSpot = parseFloat(document.getElementById('onSpotPrice').value);
+            const reserved = parseFloat(document.getElementById('reservedPrice').value);
+            const cab = (onSpot * 0.80).toFixed(2);
+
+            document.getElementById('summaryGrid').innerHTML = `
+                <div class="summary-item">
+                    <div class="s-label">Parking Name</div>
+                    <div class="s-value">${name}</div>
+                </div>
+                <div class="summary-item highlight">
+                    <div class="s-label">Total Slots</div>
+                    <div class="s-value">${total}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="s-label">Reserved Slots</div>
+                    <div class="s-value">${resSlots} <span style="font-size: 0.75rem; color: var(--text-muted);">(${reservedMode === 'percentage' ? document.getElementById('reservedValue').value + '%' : 'fixed'})</span></div>
+                </div>
+                <div class="summary-item">
+                    <div class="s-label">On-Spot Slots</div>
+                    <div class="s-value">${total - resSlots}</div>
+                </div>
+                <div class="summary-item highlight">
+                    <div class="s-label">On-Spot Price</div>
+                    <div class="s-value">₹ ${onSpot.toFixed(2)} / hr</div>
+                </div>
+                <div class="summary-item highlight">
+                    <div class="s-label">Reserved Price</div>
+                    <div class="s-value">₹ ${reserved.toFixed(2)} / hr</div>
+                </div>
+                <div class="summary-item green">
+                    <div class="s-label">Cab Driver Price <span class="discount-badge">20% OFF</span></div>
+                    <div class="s-value">₹ ${cab} / hr</div>
+                </div>
+            `;
+        }
+
+        // ==============================
+        // FINISH & SAVE
+        // ==============================
+        async function finishSetup() {
+            const btn = document.getElementById('finishBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+            await new Promise(r => setTimeout(r, 800));
+
+            const settings = {
+                parkingName: document.getElementById('parkingName').value.trim(),
+                totalSlots: parseInt(document.getElementById('totalSlots').value),
+                reservedMode: reservedMode,
+                reservedValue: parseFloat(document.getElementById('reservedValue').value),
+                reservedSlots: getComputedReservedSlots(),
+                onSpotPrice: parseFloat(document.getElementById('onSpotPrice').value),
+                reservedPrice: parseFloat(document.getElementById('reservedPrice').value),
+                cabDriverPrice: parseFloat((parseFloat(document.getElementById('onSpotPrice').value) * 0.80).toFixed(2))
+            };
+
+            const owners = getOwners();
+            if (owners[currentOwner]) {
+                owners[currentOwner].setupComplete = true;
+                owners[currentOwner].settings = settings;
+            }
+            saveOwners(owners);
+
+            showToast('Setup complete! Launching your dashboard...', 'success');
+            await new Promise(r => setTimeout(r, 1000));
+            window.location.href = 'owner-dashboard.html';
+        }
+
+        // ==============================
+        // TOAST
+        // ==============================
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById('toast');
+            const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>'
+                                          : '<i class="fa-solid fa-circle-check"></i>';
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `${icon} ${msg}`;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+    </script>
+</body>
+</html>

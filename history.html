@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking History - parkNgo</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0; padding: 2rem; background: var(--primary-color);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: var(--text-light);
+        }
+
+        /* Top Navigation Bar */
+        .dash-nav { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 1rem; }
+        .png-logo { font-size: 2rem; font-weight: 800; color: var(--text-light); text-decoration: none; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; backdrop-filter: blur(10px); transition: all 0.3s ease; display: inline-block; }
+        .png-logo span { color: var(--accent-cyan); }
+        .png-logo:hover { border-color: var(--accent-cyan); transform: translateY(-2px); }
+
+        .btn-nav {
+            color: var(--text-light); text-decoration: none; padding: 0.6rem 1.2rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; background: rgba(255,255,255,0.05); transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-family: inherit;
+        }
+        .btn-nav:hover { background: rgba(255,255,255,0.1); border-color: var(--text-light); transform: translateY(-2px); }
+
+        /* Header */
+        .header-section { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+        .page-title h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .page-title p { color: var(--text-muted); }
+        
+        .revenue-box {
+            background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 15px; padding: 1rem 2rem; text-align: right;
+        }
+        .revenue-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem; }
+        .revenue-value { font-size: 2rem; font-weight: 800; color: #00ff88; font-variant-numeric: tabular-nums; }
+
+        /* History Table */
+        .history-container {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 2rem; border-radius: 20px; width: 100%; max-width: 1000px; overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+        td { font-size: 0.95rem; font-weight: 500; }
+        .type-normal { color: #00ff88; font-weight: 600; background: rgba(0,255,136,0.1); padding: 0.2rem 0.6rem; border-radius: 10px;}
+        .type-taxi { color: var(--accent-cyan); font-weight: 600; background: rgba(0,243,255,0.1); padding: 0.2rem 0.6rem; border-radius: 10px;}
+
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .empty-history { text-align: center; color: var(--text-muted); padding: 3rem; }
+        .empty-history i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+
+        /* BG Glow */
+        .bg-glow { position: fixed; width: 400px; height: 400px; filter: blur(150px); background: #ffaa00; top: -10%; left: -10%; opacity: 0.15; z-index: -1; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <div class="dash-nav">
+        <a href="owner-dashboard.html" class="png-logo">P<span>n</span>G</a>
+        <div class="nav-actions">
+            <button class="btn-nav" onclick="window.location.href='owner-dashboard.html'"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+        </div>
+    </div>
+
+    <div class="header-section">
+        <div class="page-title">
+            <h1>Parking History Registry</h1>
+            <p>Logged records for <strong id="ownerEmail" style="color: #fff;"></strong></p>
+        </div>
+        <div class="revenue-box">
+            <div class="revenue-label">Total Revenue Earned</div>
+            <div class="revenue-value" id="totalRevDisplay">₹ 0.00</div>
+        </div>
+    </div>
+
+    <div class="history-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Slot #</th>
+                    <th>Vehicle Type</th>
+                    <th>Sim Clock-In</th>
+                    <th>Sim Clock-Out</th>
+                    <th>Time Spent</th>
+                    <th style="text-align: right;">Total Bill</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody">
+                <!-- Data injected by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Init
+        const currentOwner = sessionStorage.getItem('currentOwner');
+        if (!currentOwner) window.location.href = 'login-owner.html';
+        document.getElementById('ownerEmail').textContent = currentOwner;
+
+        // Fetch Data
+        const HISTORY_KEY = 'parkNgo_history';
+        const allHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        const myHistory = allHistory.filter(h => h.ownerEmail === currentOwner);
+        
+        // Sort newest first
+        myHistory.sort((a,b) => new Date(b.checkOutTime) - new Date(a.checkOutTime));
+
+        function formatDateTime(isoString) {
+            const d = new Date(isoString);
+            const date = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            return `${date} <span style="color:var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">${time}</span>`;
+        }
+
+        function formatTimeSpent(hoursDecimal) {
+            const h = Math.floor(hoursDecimal);
+            const m = Math.floor((hoursDecimal - h) * 60);
+            return `${h}h ${m}m`;
+        }
+
+        const tbody = document.getElementById('historyTableBody');
+        let totalRev = 0;
+
+        if (myHistory.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6"><div class="empty-history"><i class="fa-solid fa-ghost"></i><p>No parking history found yet. Head to your dashboard simulator to generate some traffic!</p></div></td></tr>`;
+        } else {
+            let html = '';
+            myHistory.forEach(h => {
+                totalRev += h.revenue;
+                const typeClass = h.vehicleType === 'taxi' ? 'type-taxi' : 'type-normal';
+                const icon = h.vehicleType === 'taxi' ? '<i class="fa-solid fa-taxi"></i>' : '<i class="fa-solid fa-car"></i>';
+                
+                html += `
+                    <tr>
+                        <td><strong>#${h.slotId}</strong></td>
+                        <td><span class="${typeClass}">${icon} ${h.vehicleType.toUpperCase()}</span></td>
+                        <td>${formatDateTime(h.checkInTime)}</td>
+                        <td>${formatDateTime(h.checkOutTime)}</td>
+                        <td>${formatTimeSpent(h.elapsedHours)}</td>
+                        <td style="text-align: right; font-weight: 700; color: #fff;">₹ ${h.revenue.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        document.getElementById('totalRevDisplay').textContent = `₹ ${totalRev.toFixed(2)}`;
+    </script>
+</body>
+</html>

@@ -3,18 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Dashboard - parkNgo</title>
+    <title>Dashboard Simulator - parkNgo</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             margin: 0;
             padding: 2rem;
             background: var(--primary-color);
             display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
+            color: var(--text-light);
         }
+        
+        /* Top Navigation Bar */
+        .dash-nav {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
         .png-logo {
             font-size: 2rem;
             font-weight: 800;
@@ -28,138 +41,624 @@
             transition: all 0.3s ease;
             display: inline-block;
         }
-        .png-logo span {
-            color: var(--accent-cyan);
-        }
+        .png-logo span { color: var(--accent-cyan); }
         .png-logo:hover {
-            background: rgba(255, 255, 255, 0.1);
             border-color: var(--accent-cyan);
             box-shadow: 0 5px 15px rgba(0, 243, 255, 0.2);
             transform: translateY(-2px);
         }
-        .logout-btn {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 0.5rem 1.2rem;
-            border: 1px solid var(--accent-purple);
-            border-radius: 8px;
-            font-weight: 600;
-            background: rgba(157, 78, 221, 0.1);
-            transition: all 0.3s ease;
-        }
-        .logout-btn:hover {
-            background: var(--accent-purple);
-            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3);
-            color: #fff;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            padding: 2.5rem;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            transform: scale(0.9);
-            transition: all 0.3s ease;
-            max-width: 400px;
-            width: 90%;
-        }
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--text-light);
-        }
-        .modal-text {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-        .modal-actions {
+
+        .nav-actions {
             display: flex;
             gap: 1rem;
-            justify-content: center;
+            align-items: center;
         }
-        .btn-cancel {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+
+        .btn-nav {
             color: var(--text-light);
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
             font-weight: 600;
-            cursor: pointer;
+            background: rgba(255,255,255,0.05);
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-family: inherit;
         }
-        .btn-cancel:hover {
+        .btn-nav:hover {
             background: rgba(255,255,255,0.1);
             border-color: var(--text-light);
+            transform: translateY(-2px);
         }
-        .btn-confirm {
-            background: transparent;
-            border: 1px solid var(--accent-purple);
-            color: #fff;
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+        .btn-sim {
+            border-color: #00ff88;
+            background: rgba(0,255,136,0.1);
+            color: #00ff88;
+        }
+        .btn-sim:hover {
+            background: #00ff88;
+            color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0,255,136,0.3);
+        }
+        .btn-history {
+            border-color: #ffaa00;
+            background: rgba(255,170,0,0.1);
+            color: #ffaa00;
+        }
+        .btn-history:hover {
+            background: #ffaa00;
+            color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(255,170,0,0.3);
+        }
+
+        /* Dashboard Header Elements */
+        .dash-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .dash-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .dash-header h1 span { color: var(--accent-cyan); }
+        
+        .sim-time-bar {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            display: inline-flex;
+            gap: 2.5rem;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            margin-top: 1rem;
+        }
+        .time-block .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.2rem;
+        }
+        .time-block .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            font-variant-numeric: tabular-nums;
+        }
+        .sim-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-weight: 600;
+            color: var(--accent-cyan);
+            background: rgba(0,243,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Grid Layout */
+        .parking-grid-wrapper {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .grid-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            justify-content: flex-end;
+            font-size: 0.9rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+        .l-box {
+            width: 16px; height: 16px; border-radius: 4px;
+        }
+        .l-onspot { border: 2px solid rgba(255,255,255,0.3); }
+        .l-reserved { border: 2px solid var(--accent-purple); }
+        .l-normal { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; }
+        .l-taxi { background: rgba(0,243,255,0.2); border: 2px solid var(--accent-cyan); }
+
+        .parking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 1rem;
+        }
+
+        .slot {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.1);
         }
-        .btn-confirm:hover {
-            background: var(--accent-purple);
-            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3);
+        .slot-id { font-weight: 800; font-size: 1.2rem; }
+        .slot-type { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.2rem; font-weight: 600; }
+        
+        /* Slot Colors */
+        .slot.type-onspot { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); }
+        .slot.type-reserved { border-color: var(--accent-purple); color: var(--accent-purple); background: rgba(157,78,221,0.05); }
+        
+        .slot.occupied-normal {
+            background: rgba(0,255,136,0.15);
+            border-color: #00ff88;
+            color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.2);
         }
+        .slot.occupied-taxi {
+            background: rgba(0,243,255,0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0,243,255,0.2);
+        }
+
+        /* Live Pricing Table */
+        .live-table-container {
+            width: 100%; max-width: 1000px; margin-top: 2rem;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+            padding: 2rem; overflow-x: auto;
+        }
+        .live-table-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-light); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+        td { font-size: 1rem; font-weight: 500; }
+        .row-normal td { color: #00ff88; }
+        .row-taxi td { color: var(--accent-cyan); }
+        
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: rgba(15, 20, 35, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem; border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: scale(0.9); transition: all 0.3s ease;
+            width: 90%; max-width: 450px;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .modal-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-light); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        .modal-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; margin-top: 0.5rem;}
+        
+        .field { margin-bottom: 1.2rem; }
+        .field label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-light); }
+        .field input, .field select {
+            width: 100%; padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px; color: var(--text-light); font-family: inherit; font-size: 1rem;
+        }
+        
+        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+        .btn-action {
+            flex: 1; padding: 0.9rem; border-radius: 8px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; transition: all 0.2s ease;
+        }
+        .btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: var(--text-light); }
+        .btn-cancel:hover { background: rgba(255,255,255,0.05); }
+        
+        .btn-normal { background: rgba(0,255,136,0.15); color: #00ff88; border: 1px solid #00ff88; }
+        .btn-normal:hover { background: #00ff88; color: var(--primary-color); }
+        
+        .btn-taxi { background: rgba(0,243,255,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+        .btn-taxi:hover { background: var(--accent-cyan); color: var(--primary-color); }
+
+        .btn-free { background: #ff4757; color: #fff; }
+        .btn-free:hover { box-shadow: 0 5px 15px rgba(255,71,87,0.3); }
+
+        .info-locked { font-size: 0.85rem; color: #ffaa00; background: rgba(255,170,0,0.1); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,170,0,0.3); margin-bottom: 1rem; display: none; }
+
+        .price-label { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body>
-    <a href="owner-dashboard.html" class="png-logo">P<span>n</span>G</a>
-    <a href="#" class="logout-btn" onclick="openModal(event)">Logout</a>
+    <div class="bg-glow" style="position: fixed; width: 400px; height: 400px; filter: blur(150px); background: var(--accent-purple); top: -10%; left: -10%; opacity: 0.2; z-index: -1; border-radius: 50%;"></div>
+    
+    <!-- Navigation -->
+    <div class="dash-nav">
+        <a href="owner-dashboard.html" class="png-logo">P<span>n</span>G</a>
+        <div class="nav-actions">
+            <button class="btn-nav btn-history" onclick="window.location.href='history.html'"><i class="fa-solid fa-list-ul"></i> View History</button>
+            <button class="btn-nav btn-sim" onclick="openSimSettings()"><i class="fa-solid fa-clock-rotate-left"></i> Simulation Settings</button>
+            <a href="owner-edit.html" class="btn-nav"><i class="fa-solid fa-gear"></i> Setup</a>
+            <button class="btn-nav" style="border-color: #ff4757; color: #ff4757;" onclick="openLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+    </div>
 
-    <div class="modal-overlay" id="logoutModal">
+    <!-- Header & Time Bar -->
+    <div class="dash-header">
+        <h1>Dashboard Simulator: <span id="displayParkingName">Parking Space</span></h1>
+        <div class="sim-time-bar">
+            <div class="time-block"><div class="label">Simulated Date</div><div class="value" id="simDateDisplay">--/--/----</div></div>
+            <div class="time-block"><div class="label">Simulated Time</div><div class="value" id="simTimeDisplay">--:--</div></div>
+            <div class="sim-indicator"><i class="fa-solid fa-bolt"></i> <span id="simSpeedDisplay">30m / sec</span></div>
+        </div>
+    </div>
+
+    <!-- Parking Grid -->
+    <div class="parking-grid-wrapper">
+        <div class="grid-legend">
+            <div class="legend-item"><div class="l-box l-onspot"></div> Free (On-Spot)</div>
+            <div class="legend-item"><div class="l-box l-reserved"></div> Free (Reserved)</div>
+            <div class="legend-item"><div class="l-box l-normal"></div> Booked (Normal)</div>
+            <div class="legend-item"><div class="l-box l-taxi"></div> Booked (Taxi)</div>
+        </div>
+        <div class="parking-grid" id="gridContainer">
+            <!-- Slots generated by JS -->
+        </div>
+    </div>
+
+    <div class="live-table-container">
+        <div class="live-table-title"><i class="fa-solid fa-chart-line"></i> Live Tracking</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Slot #</th>
+                    <th>Type</th>
+                    <th>Check In Time</th>
+                    <th>Time Elapsed</th>
+                    <th>Live Bill</th>
+                </tr>
+            </thead>
+            <tbody id="liveTableBody">
+                <tr style="color: var(--text-muted);"><td colspan="5" style="text-align: center;">No active parkings...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODALS -->
+    <!-- ============================================== -->
+
+    <!-- Booking Modal (Clock In) -->
+    <div class="modal-overlay" id="bookingModal">
         <div class="modal-content">
-            <h2 class="modal-title">Confirm Logout</h2>
-            <p class="modal-text">Are you sure you want to end your current session?</p>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn-confirm" onclick="window.location.href='login.html'">Logout</button>
+            <h2 class="modal-title">Check In Slot <span id="bookSlotId" style="color: var(--accent-cyan);"></span></h2>
+            <p class="modal-subtitle">Clock-in a vehicle. Pricing starts accumulating based on the simulator clock instantly.</p>
+            
+            <div class="modal-actions" style="flex-direction: column;">
+                <button class="btn-action btn-normal" onclick="confirmCheckIn('normal')"><i class="fa-solid fa-car"></i> Book Normal (₹<span id="rateNormal"></span>/hr)</button>
+                <button class="btn-action btn-taxi" onclick="confirmCheckIn('taxi')"><i class="fa-solid fa-taxi"></i> Book Taxi (₹<span id="rateTaxi"></span>/hr)</button>
+                <button class="btn-action btn-cancel" onclick="closeModals()" style="margin-top: 1rem;">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- Free Modal (Clock Out) -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Check Out Slot <span id="checkSlotId" style="color: var(--accent-cyan);"></span></h2>
+            <p class="modal-subtitle">Generate final bill and free the slot.</p>
+            
+            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 1.5rem; text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Time Elapsed</div>
+                <div id="checkTime" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-light);">0 hrs 0 mins</div>
+                
+                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Final Amount Due</div>
+                <div id="checkBill" class="price-label">₹ 0.00</div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-action btn-cancel" onclick="closeModals()">Cancel</button>
+                <button class="btn-action btn-free" onclick="confirmCheckOut()"><i class="fa-solid fa-right-from-bracket"></i> Free Spot</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation Settings Modal -->
+    <div class="modal-overlay" id="simSettingsModal">
+        <div class="modal-content">
+            <h2 class="modal-title"><i class="fa-solid fa-clock"></i> Simulation Engine</h2>
+            <div class="info-locked" id="lockInfo"><i class="fa-solid fa-lock"></i> Time manipulation is locked while slots are actively booked. You can still adjust simulation speed.</div>
+
+            <form id="simForm" onsubmit="saveSimSettings(event)">
+                <div class="field"><label>Simulated Date</label><input type="date" id="simSetDate"></div>
+                <div class="field"><label>Simulated Time</label><input type="time" id="simSetTime"></div>
+                <div class="field">
+                    <label>Speed (Simulated Minutes per real Second)</label>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="range" id="simSpeedSlider" min="1" max="120" value="30" style="flex: 1;" oninput="document.getElementById('speedIndicator').textContent=this.value+' min'">
+                        <span id="speedIndicator" style="font-weight: 700; color: var(--accent-cyan); width: 60px;">30 min</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-action btn-cancel" onclick="closeModals()">Cancel</button>
+                    <button type="submit" class="btn-action btn-submit">Apply Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 class="modal-title" style="border: none;">End Session</h2>
+            <p class="modal-subtitle">Simulation state will be reset. Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-action btn-cancel" onclick="closeModals()">Cancel</button>
+                <button class="btn-action" style="background: #ff4757; color: #fff;" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- SCRIPT LOGIC -->
+    <!-- ============================================== -->
     <script>
-        function openModal(e) {
+        // ==============================
+        // 1. DATA & INITIALIZATION
+        // ==============================
+        const currentOwnerEmail = sessionStorage.getItem('currentOwner');
+        if (!currentOwnerEmail) window.location.href = 'login-owner.html';
+
+        const DB_KEY = 'parkNgo_owners';
+        const HISTORY_KEY = 'parkNgo_history';
+        const owners = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+        const ownerData = owners[currentOwnerEmail];
+
+        if (!ownerData || !ownerData.setupComplete) window.location.href = 'owner-setup.html';
+        document.getElementById('displayParkingName').textContent = ownerData.settings.parkingName;
+        
+        document.getElementById('rateNormal').textContent = ownerData.settings.onSpotPrice.toFixed(2);
+        document.getElementById('rateTaxi').textContent = ownerData.settings.cabDriverPrice.toFixed(2);
+
+        // Slots config
+        const totalConfigSlots = ownerData.settings.totalSlots;
+        const resConfigSlots = ownerData.settings.reservedSlots;
+        const onSpotConfigSlots = totalConfigSlots - resConfigSlots;
+
+        // Simulation State
+        let simDate = new Date();
+        let simSpeed = 30; // Minutes added per interval
+        let tickerIntervalId;
+        
+        // Data structure for slots
+        // Array of objects holding simulation state
+        let parkingSlots = [];
+
+        function initGrid() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+            parkingSlots = [];
+
+            for (let i = 1; i <= totalConfigSlots; i++) {
+                const isReserved = i > onSpotConfigSlots;
+                const slotType = isReserved ? 'reserved' : 'onspot';
+                const label = isReserved ? 'RSV' : 'SPT';
+
+                const slotData = {
+                    id: i,
+                    baseType: slotType, // onspot or reserved visual
+                    status: 'free', // 'free' | 'normal' | 'taxi'
+                    checkIn: null // Date object
+                };
+                parkingSlots.push(slotData);
+
+                const div = document.createElement('div');
+                div.className = `slot type-${slotType}`;
+                div.id = `slot-dom-${i}`;
+                div.innerHTML = `<span class="slot-id">${i}</span><span class="slot-type">${label}</span>`;
+                div.onclick = () => handleSlotClick(slotData.id);
+                
+                container.appendChild(div);
+            }
+        }
+
+        // ==============================
+        // 2. SIMULATION ENGINE / LIVE TABLE
+        // ==============================
+        function startSimulation() {
+            if (tickerIntervalId) clearInterval(tickerIntervalId);
+            tickerIntervalId = setInterval(() => {
+                simDate.setMinutes(simDate.getMinutes() + Number(simSpeed));
+                updateDashboardHeader();
+                renderLiveTable();
+            }, 1000); // 1 real second
+        }
+
+        function updateDashboardHeader() {
+            const d = String(simDate.getDate()).padStart(2, '0');
+            const m = String(simDate.getMonth() + 1).padStart(2, '0');
+            const y = simDate.getFullYear();
+            const hh = String(simDate.getHours()).padStart(2, '0');
+            const mm = String(simDate.getMinutes()).padStart(2, '0');
+
+            document.getElementById('simDateDisplay').textContent = `${d}/${m}/${y}`;
+            document.getElementById('simTimeDisplay').textContent = `${hh}:${mm}`;
+            document.getElementById('simSpeedDisplay').textContent = `${simSpeed}m / sec`;
+        }
+
+        function getSlotElapsedAndPrice(slot) {
+            const msElapsed = simDate.getTime() - slot.checkIn.getTime();
+            const hoursElapsed = Math.max(0, msElapsed / (1000 * 60 * 60)); // Standardize hours
+            const rate = slot.status === 'taxi' ? ownerData.settings.cabDriverPrice : ownerData.settings.onSpotPrice;
+            const price = hoursElapsed * rate;
+
+            const displayHrs = Math.floor(hoursElapsed);
+            const displayMins = Math.floor((hoursElapsed - displayHrs) * 60);
+
+            return { hoursElapsed, displayHrs, displayMins, price };
+        }
+
+        function renderLiveTable() {
+            const tbody = document.getElementById('liveTableBody');
+            const occupiedSlots = parkingSlots.filter(s => s.status !== 'free');
+            
+            if (occupiedSlots.length === 0) {
+                tbody.innerHTML = '<tr style="color: var(--text-muted);"><td colspan="5" style="text-align: center;">No active parkings...</td></tr>';
+                return;
+            }
+
+            let html = '';
+            occupiedSlots.forEach(slot => {
+                const data = getSlotElapsedAndPrice(slot);
+                const colorClass = slot.status === 'taxi' ? 'row-taxi' : 'row-normal';
+                
+                const hh = String(slot.checkIn.getHours()).padStart(2, '0');
+                const mm = String(slot.checkIn.getMinutes()).padStart(2, '0');
+                
+                html += `
+                    <tr class="${colorClass}">
+                        <td><strong>#${slot.id}</strong></td>
+                        <td style="text-transform: capitalize;">${slot.status}</td>
+                        <td>${hh}:${mm}</td>
+                        <td>${data.displayHrs}h ${data.displayMins}m</td>
+                        <td style="font-weight: 800;">₹ ${data.price.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function isAnySlotBooked() {
+            return parkingSlots.some(s => s.status !== 'free');
+        }
+
+        // ==============================
+        // 3. BOOKING & CHECKOUT
+        // ==============================
+        let activeSlotId = null;
+
+        function handleSlotClick(slotId) {
+            const slot = parkingSlots.find(s => s.id === slotId);
+            activeSlotId = slotId;
+
+            if (slot.status === 'free') {
+                document.getElementById('bookSlotId').textContent = `#${slotId}`;
+                document.getElementById('bookingModal').classList.add('active');
+            } else {
+                // Checkout Flow
+                document.getElementById('checkSlotId').textContent = `#${slotId}`;
+                
+                // Show current metrics
+                const data = getSlotElapsedAndPrice(slot);
+                document.getElementById('checkTime').textContent = `${data.displayHrs} hrs ${data.displayMins} mins`;
+                document.getElementById('checkBill').textContent = `₹ ${data.price.toFixed(2)}`;
+                document.getElementById('checkBill').style.color = slot.status === 'taxi' ? 'var(--accent-cyan)' : '#00ff88';
+
+                document.getElementById('checkoutModal').classList.add('active');
+            }
+        }
+
+        function confirmCheckIn(type) { // 'normal' or 'taxi'
+            const slot = parkingSlots.find(s => s.id === activeSlotId);
+            slot.status = type;
+            slot.checkIn = new Date(simDate.getTime()); // Lock in time
+
+            const domEl = document.getElementById(`slot-dom-${slot.id}`);
+            domEl.classList.remove('type-onspot', 'type-reserved');
+            domEl.classList.add(`occupied-${type}`);
+
+            renderLiveTable();
+            closeModals();
+        }
+
+        function confirmCheckOut() {
+            const slot = parkingSlots.find(s => s.id === activeSlotId);
+            const data = getSlotElapsedAndPrice(slot);
+
+            // Construct History Object
+            const record = {
+                ownerEmail: currentOwnerEmail,
+                slotId: slot.id,
+                vehicleType: slot.status,
+                checkInTime: slot.checkIn.toISOString(),
+                checkOutTime: simDate.toISOString(),
+                elapsedHours: data.hoursElapsed,
+                revenue: data.price
+            };
+
+            // Save to DB
+            const historyDB = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            historyDB.push(record);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(historyDB));
+
+            // Free slot in UI
+            slot.status = 'free';
+            slot.checkIn = null;
+            
+            const domEl = document.getElementById(`slot-dom-${slot.id}`);
+            domEl.classList.remove('occupied-normal', 'occupied-taxi');
+            domEl.classList.add(`type-${slot.baseType}`);
+
+            renderLiveTable();
+            closeModals();
+        }
+
+        // ==============================
+        // 4. SIMULATION SETTINGS
+        // ==============================
+        function openSimSettings() {
+            const locked = isAnySlotBooked();
+            const dateInp = document.getElementById('simSetDate');
+            const timeInp = document.getElementById('simSetTime');
+            const lockInfo = document.getElementById('lockInfo');
+            
+            const offsetDate = new Date(simDate.getTime() - (simDate.getTimezoneOffset() * 60000));
+            dateInp.value = offsetDate.toISOString().split('T')[0];
+            const hh = String(simDate.getHours()).padStart(2, '0');
+            const mm = String(simDate.getMinutes()).padStart(2, '0');
+            timeInp.value = `${hh}:${mm}`;
+
+            if (locked) { dateInp.disabled = true; timeInp.disabled = true; lockInfo.style.display = 'block'; } 
+            else { dateInp.disabled = false; timeInp.disabled = false; lockInfo.style.display = 'none'; }
+
+            document.getElementById('simSpeedSlider').value = simSpeed;
+            document.getElementById('speedIndicator').textContent = `${simSpeed} min`;
+            
+            document.getElementById('simSettingsModal').classList.add('active');
+        }
+
+        function saveSimSettings(e) {
             e.preventDefault();
-            document.getElementById('logoutModal').classList.add('active');
+            simSpeed = parseInt(document.getElementById('simSpeedSlider').value);
+
+            if (!isAnySlotBooked()) {
+                const dateStr = document.getElementById('simSetDate').value;
+                const timeStr = document.getElementById('simSetTime').value;
+                if (dateStr && timeStr) simDate = new Date(`${dateStr}T${timeStr}`);
+            }
+
+            updateDashboardHeader();
+            renderLiveTable();
+            closeModals();
         }
-        function closeModal() {
-            document.getElementById('logoutModal').classList.remove('active');
-        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+        function openLogout() { document.getElementById('logoutModal').classList.add('active'); }
+        function logout() { sessionStorage.removeItem('currentOwner'); window.location.href = 'login.html'; }
+
+        // Boot
+        initGrid();
+        updateDashboardHeader();
+        startSimulation();
+
     </script>
 </body>
 </html>

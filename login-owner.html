@@ -44,12 +44,13 @@
             margin-bottom: 1.5rem;
             position: relative;
         }
-        .form-group i {
+        .form-group i.field-icon {
             position: absolute;
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
+            pointer-events: none;
         }
         .form-control {
             width: 100%;
@@ -87,6 +88,11 @@
             background: #843bba;
             transform: translateY(-2px);
         }
+        .auth-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         .auth-footer {
             text-align: center;
             margin-top: 2rem;
@@ -97,6 +103,7 @@
             color: var(--accent-cyan);
             text-decoration: none;
             transition: color 0.3s ease;
+            cursor: pointer;
         }
         .auth-footer a:hover {
             color: white;
@@ -118,6 +125,118 @@
         .back-link:hover {
             color: var(--accent-cyan);
         }
+
+        /* Tab switcher */
+        .auth-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .auth-tab.active {
+            background: var(--accent-purple);
+            color: var(--text-light);
+        }
+        .auth-tab:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+
+        /* Form panels */
+        .auth-panel {
+            display: none;
+        }
+        .auth-panel.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: inherit;
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 380px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast-error {
+            background: rgba(255, 50, 50, 0.15);
+            border: 1px solid rgba(255, 50, 50, 0.4);
+            color: #ff6b6b;
+            backdrop-filter: blur(10px);
+        }
+        .toast-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Loading spinner in button */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Password strength */
+        .password-strength {
+            height: 3px;
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        .strength-weak   { width: 33%; background: #ff6b6b; }
+        .strength-medium { width: 66%; background: #ffaa00; }
+        .strength-strong { width: 100%; background: #00ff88; }
     </style>
 </head>
 <body>
@@ -126,28 +245,275 @@
     
     <a href="login.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to options</a>
 
+    <!-- Toast container -->
+    <div id="toast" class="toast"></div>
+
     <div class="auth-wrapper">
         <div class="auth-container">
             <div class="auth-header">
                 <h2>Owner Portal</h2>
-                <p>Login to access your parking analytics</p>
+                <p>Manage your parking space with ease</p>
             </div>
-            <form action="owner-dashboard.html">
-                <div class="form-group">
-                    <i class="fa-solid fa-envelope"></i>
-                    <input type="email" class="form-control" placeholder="Email Address" value="johndoe@gmail.com" required>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+                <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- LOGIN PANEL -->
+            <div class="auth-panel active" id="panelLogin">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <i class="fa-solid fa-envelope field-icon"></i>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fa-solid fa-lock field-icon"></i>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="auth-btn" id="loginBtn">Sign In to Dashboard</button>
+                    <button type="button" class="auth-btn" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); margin-top: 0.5rem;" onclick="loginAsTester()">Login as Tester</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Don't have an owner account? <a onclick="switchTab('register')">Register here</a></p>
                 </div>
-                <div class="form-group">
-                    <i class="fa-solid fa-lock"></i>
-                    <input type="password" class="form-control" placeholder="Password" value="12345678" required>
+            </div>
+
+            <!-- REGISTER PANEL -->
+            <div class="auth-panel" id="panelRegister">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <i class="fa-solid fa-envelope field-icon"></i>
+                        <input type="email" id="regEmail" class="form-control" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fa-solid fa-lock field-icon"></i>
+                        <input type="password" id="regPassword" class="form-control" placeholder="Password (min 6 chars)" minlength="6" required oninput="updateStrength(this.value)">
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <i class="fa-solid fa-lock field-icon"></i>
+                        <input type="password" id="regConfirm" class="form-control" placeholder="Confirm Password" minlength="6" required>
+                    </div>
+                    <button type="submit" class="auth-btn" id="registerBtn">Create Account</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a onclick="switchTab('login')">Sign in here</a></p>
                 </div>
-                <button type="submit" class="auth-btn">Sign In to Dashboard</button>
-            </form>
-            <div class="auth-footer">
-                <p>Don't have an owner account? <a href="#">Register here</a></p>
-                <p style="margin-top: 0.5rem;"><a href="#">Forgot Password?</a></p>
             </div>
         </div>
     </div>
+
+    <script>
+        // ==============================
+        // DATABASE UTILITIES
+        // ==============================
+
+        const DB_KEY = 'parkNgo_owners';
+
+        // Load db.json seed on first visit
+        async function seedDatabase() {
+            if (localStorage.getItem(DB_KEY)) return; // already seeded
+            try {
+                const res = await fetch('assets/data/db.json');
+                const data = await res.json();
+                if (data.owners) {
+                    localStorage.setItem(DB_KEY, JSON.stringify(data.owners));
+                }
+            } catch (e) {
+                // If fetch fails (e.g. file:// protocol), initialize empty
+                localStorage.setItem(DB_KEY, JSON.stringify({}));
+            }
+        }
+
+        function getOwners() {
+            return JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+        }
+
+        function saveOwners(owners) {
+            localStorage.setItem(DB_KEY, JSON.stringify(owners));
+        }
+
+        // SHA-256 hash using Web Crypto API
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // ==============================
+        // TAB SWITCHING
+        // ==============================
+
+        function switchTab(tab) {
+            document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+            document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+            document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+            document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+        }
+
+        // ==============================
+        // TOAST NOTIFICATIONS
+        // ==============================
+
+        function showToast(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>'
+                                          : '<i class="fa-solid fa-circle-check"></i>';
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `${icon} ${message}`;
+            // Trigger reflow for re-animation
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // ==============================
+        // PASSWORD STRENGTH INDICATOR
+        // ==============================
+
+        function updateStrength(val) {
+            const bar = document.getElementById('strengthBar');
+            bar.className = 'password-strength-bar';
+            if (val.length === 0) return;
+            if (val.length < 6)                        bar.classList.add('strength-weak');
+            else if (val.length < 10 || !/\d/.test(val)) bar.classList.add('strength-medium');
+            else                                        bar.classList.add('strength-strong');
+        }
+
+        // ==============================
+        // LOGIN HANDLER
+        // ==============================
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Signing in...';
+
+            // Simulate slight delay for UX
+            await new Promise(r => setTimeout(r, 600));
+
+            const owners = getOwners();
+            const owner = owners[email];
+
+            if (!owner) {
+                showToast('No account found with this email.');
+                btn.disabled = false;
+                btn.textContent = 'Sign In to Dashboard';
+                return;
+            }
+
+            const hash = await hashPassword(password);
+            if (hash !== owner.passwordHash) {
+                showToast('Incorrect password. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Sign In to Dashboard';
+                return;
+            }
+
+            // Credentials valid — store session
+            sessionStorage.setItem('currentOwner', email);
+            showToast('Login successful! Redirecting...', 'success');
+
+            await new Promise(r => setTimeout(r, 800));
+
+            // Route based on setup status
+            if (owner.setupComplete) {
+                window.location.href = 'owner-dashboard.html';
+            } else {
+                window.location.href = 'owner-setup.html';
+            }
+        }
+
+        async function loginAsTester() {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<span class="spinner"></span> Preparing Tester...';
+            
+            const owners = getOwners();
+            if (!owners['tester@gmail.com']) {
+                const hash = await hashPassword('123456');
+                owners['tester@gmail.com'] = {
+                    passwordHash: hash,
+                    setupComplete: true,
+                    createdAt: new Date().toISOString(),
+                    settings: {
+                        parkingName: "Test Environment Hub",
+                        totalSlots: 100,
+                        reservedMode: "amount",
+                        reservedValue: 20,
+                        reservedSlots: 20,
+                        onSpotPrice: 50.00,
+                        reservedPrice: 80.00,
+                        cabDriverPrice: 40.00
+                    }
+                };
+                saveOwners(owners);
+            }
+            
+            document.getElementById('loginEmail').value = 'tester@gmail.com';
+            document.getElementById('loginPassword').value = '123456';
+            document.getElementById('loginBtn').click();
+        }
+
+        // ==============================
+        // REGISTER HANDLER
+        // ==============================
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+
+            if (password !== confirm) {
+                showToast('Passwords do not match.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+            await new Promise(r => setTimeout(r, 600));
+
+            const owners = getOwners();
+
+            if (owners[email]) {
+                showToast('An account with this email already exists.');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+                return;
+            }
+
+            const hash = await hashPassword(password);
+            owners[email] = {
+                passwordHash: hash,
+                setupComplete: false,
+                createdAt: new Date().toISOString(),
+                settings: null
+            };
+            saveOwners(owners);
+
+            sessionStorage.setItem('currentOwner', email);
+            showToast('Account created! Setting up your space...', 'success');
+
+            await new Promise(r => setTimeout(r, 800));
+            window.location.href = 'owner-setup.html';
+        }
+
+        // ==============================
+        // INIT
+        // ==============================
+        seedDatabase();
+    </script>
 </body>
 </html>
