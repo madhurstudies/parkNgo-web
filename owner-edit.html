@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Parking Settings - parkNgo</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--primary-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== TOP BAR ========== */
+        .edit-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(11, 15, 25, 0.6);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .png-logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        .png-logo span { color: var(--accent-cyan); }
+        .back-dashboard {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.3s ease;
+        }
+        .back-dashboard:hover { color: var(--accent-cyan); }
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .topbar-user i {
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        /* ========== MAIN WRAPPER ========== */
+        .edit-wrapper {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 3rem 2rem 5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-light);
+            margin-bottom: 0.4rem;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ========== SETTINGS SECTIONS ========== */
+        .settings-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+        .settings-section:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .section-title i {
+            color: var(--accent-purple);
+            font-size: 1rem;
+        }
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ========== FORM FIELDS ========== */
+        .field {
+            margin-bottom: 1.3rem;
+        }
+        .field:last-child { margin-bottom: 0; }
+        .field label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-light);
+        }
+        .field label .hint {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .field input[type="text"],
+        .field input[type="number"] {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.25);
+        }
+
+        /* Toggle */
+        .toggle-group {
+            display: flex;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+        .toggle-option {
+            flex: 1;
+            padding: 0.65rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .toggle-option.active {
+            background: var(--accent-purple);
+            color: var(--text-light);
+        }
+        .toggle-option:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Info box */
+        .info-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0, 243, 255, 0.06);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 10px;
+            padding: 0.9rem;
+            margin-top: 0.7rem;
+        }
+        .info-box i {
+            color: var(--accent-cyan);
+            font-size: 1rem;
+        }
+        .info-box span {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* Cab Price Row */
+        .cab-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 255, 136, 0.04);
+            border: 1px solid rgba(0, 255, 136, 0.15);
+            border-radius: 10px;
+            margin-top: 0.8rem;
+        }
+        .cab-price-row .label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .cab-price-row .value {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #00ff88;
+        }
+        .discount-badge {
+            font-size: 0.65rem;
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-left: 0.4rem;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn-update {
+            flex: 1;
+            padding: 1rem;
+            background: var(--accent-purple);
+            color: var(--text-light);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-update:hover {
+            background: #843bba;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(157, 78, 221, 0.3);
+        }
+        .btn-update:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-cancel {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-light);
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: inherit;
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 380px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast-error {
+            background: rgba(255, 50, 50, 0.15);
+            border: 1px solid rgba(255, 50, 50, 0.4);
+            color: #ff6b6b;
+        }
+        .toast-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Glow */
+        .bg-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            filter: blur(150px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @media (max-width: 600px) {
+            .edit-wrapper { padding: 2rem 1rem 3rem; }
+            .settings-section { padding: 1.5rem; }
+            .edit-topbar { padding: 1rem 1.5rem; }
+            .topbar-left { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background glow -->
+    <div class="bg-glow" style="background: var(--accent-purple); top: -10%; right: -5%; opacity: 0.2;"></div>
+    <div class="bg-glow" style="background: var(--accent-cyan); bottom: -15%; left: -10%; opacity: 0.12;"></div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Top bar -->
+    <div class="edit-topbar">
+        <div class="topbar-left">
+            <a href="owner-dashboard.html" class="png-logo">P<span>n</span>G</a>
+            <a href="owner-dashboard.html" class="back-dashboard"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+        </div>
+        <div class="topbar-user">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="userEmail">owner@email.com</span>
+        </div>
+    </div>
+
+    <div class="edit-wrapper">
+        <div class="page-header">
+            <h1><i class="fa-solid fa-gear" style="color: var(--accent-purple);"></i> Edit Settings</h1>
+            <p>Update your parking space configuration. Changes are saved instantly.</p>
+        </div>
+
+        <!-- SECTION: Space Info -->
+        <div class="settings-section">
+            <div class="section-title"><i class="fa-solid fa-warehouse"></i> Parking Space</div>
+            <p class="section-desc">Update the name and total capacity of your parking area.</p>
+            <div class="field">
+                <label>Parking Space Name</label>
+                <input type="text" id="parkingName">
+            </div>
+            <div class="field">
+                <label>Total Number of Slots</label>
+                <input type="number" id="totalSlots" min="1" oninput="updateReservedInfo()">
+            </div>
+        </div>
+
+        <!-- SECTION: Reserved Slots -->
+        <div class="settings-section">
+            <div class="section-title"><i class="fa-solid fa-bookmark"></i> Reserved Slots</div>
+            <p class="section-desc">Adjust the number of slots reserved for pre-booked customers.</p>
+
+            <div class="toggle-group">
+                <button class="toggle-option active" id="togglePercent" onclick="setReservedMode('percentage')">
+                    <i class="fa-solid fa-percent"></i> Percentage
+                </button>
+                <button class="toggle-option" id="toggleAmount" onclick="setReservedMode('amount')">
+                    <i class="fa-solid fa-hashtag"></i> Fixed Number
+                </button>
+            </div>
+            <div class="field">
+                <label id="reservedLabel">Reserved Slots (%)</label>
+                <input type="number" id="reservedValue" min="0" oninput="updateReservedInfo()">
+            </div>
+            <div class="info-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <span id="reservedInfoText">-</span>
+            </div>
+        </div>
+
+        <!-- SECTION: Pricing -->
+        <div class="settings-section">
+            <div class="section-title"><i class="fa-solid fa-indian-rupee-sign"></i> Pricing</div>
+            <p class="section-desc">Update per-hour rates. Cab driver price auto-updates at 20% discount.</p>
+            <div class="field">
+                <label>On-Spot Hourly Price <span class="hint">(₹ / hr)</span></label>
+                <input type="number" id="onSpotPrice" min="0" step="0.01" oninput="updateCabPrice()">
+            </div>
+            <div class="field">
+                <label>Reserved Hourly Price <span class="hint">(₹ / hr)</span></label>
+                <input type="number" id="reservedPrice" min="0" step="0.01">
+            </div>
+            <div class="cab-price-row">
+                <div>
+                    <span class="label">Cab Driver Price</span>
+                    <span class="discount-badge">20% OFF</span>
+                </div>
+                <span class="value" id="cabPriceDisplay">₹ 0.00 / hr</span>
+            </div>
+        </div>
+
+        <!-- Save / Cancel -->
+        <div class="btn-row">
+            <a href="owner-dashboard.html" class="btn-cancel">Cancel</a>
+            <button class="btn-update" id="updateBtn" onclick="saveSettings()">
+                <i class="fa-solid fa-floppy-disk"></i> Update Settings
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==============================
+        // SESSION CHECK
+        // ==============================
+        const currentOwner = sessionStorage.getItem('currentOwner');
+        if (!currentOwner) {
+            window.location.href = 'login-owner.html';
+        }
+        document.getElementById('userEmail').textContent = currentOwner || '';
+
+        const DB_KEY = 'parkNgo_owners';
+        function getOwners() { return JSON.parse(localStorage.getItem(DB_KEY) || '{}'); }
+        function saveOwners(o) { localStorage.setItem(DB_KEY, JSON.stringify(o)); }
+
+        let reservedMode = 'percentage';
+
+        // ==============================
+        // LOAD CURRENT SETTINGS
+        // ==============================
+        function loadSettings() {
+            const owners = getOwners();
+            const owner = owners[currentOwner];
+            if (!owner || !owner.settings) {
+                showToast('No settings found. Redirecting to setup...');
+                setTimeout(() => window.location.href = 'owner-setup.html', 1500);
+                return;
+            }
+
+            const s = owner.settings;
+            document.getElementById('parkingName').value = s.parkingName || '';
+            document.getElementById('totalSlots').value = s.totalSlots || '';
+            document.getElementById('reservedValue').value = s.reservedValue || '';
+            document.getElementById('onSpotPrice').value = s.onSpotPrice || '';
+            document.getElementById('reservedPrice').value = s.reservedPrice || '';
+
+            reservedMode = s.reservedMode || 'percentage';
+            setReservedMode(reservedMode);
+            updateCabPrice();
+            updateReservedInfo();
+        }
+
+        // ==============================
+        // RESERVED MODE
+        // ==============================
+        function setReservedMode(mode) {
+            reservedMode = mode;
+            document.getElementById('togglePercent').classList.toggle('active', mode === 'percentage');
+            document.getElementById('toggleAmount').classList.toggle('active', mode === 'amount');
+            document.getElementById('reservedLabel').textContent = mode === 'percentage' ? 'Reserved Slots (%)' : 'Reserved Slots (Fixed Number)';
+            updateReservedInfo();
+        }
+
+        function updateReservedInfo() {
+            const val = parseFloat(document.getElementById('reservedValue').value);
+            const total = parseInt(document.getElementById('totalSlots').value) || 0;
+            const infoText = document.getElementById('reservedInfoText');
+
+            if (isNaN(val) || val < 0) {
+                infoText.textContent = 'Enter a value to see computed slots';
+                return;
+            }
+            if (reservedMode === 'percentage') {
+                const computed = Math.round((val / 100) * total);
+                infoText.textContent = `${val}% of ${total} total = ${computed} reserved, ${total - computed} on-spot`;
+            } else {
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                infoText.textContent = `${val} reserved / ${total} total = ${pct}% reserved, ${total - val} on-spot`;
+            }
+        }
+
+        function getComputedReservedSlots() {
+            const val = parseFloat(document.getElementById('reservedValue').value) || 0;
+            const total = parseInt(document.getElementById('totalSlots').value) || 0;
+            if (reservedMode === 'percentage') return Math.round((val / 100) * total);
+            return Math.min(parseInt(val), total);
+        }
+
+        function updateCabPrice() {
+            const onSpot = parseFloat(document.getElementById('onSpotPrice').value) || 0;
+            document.getElementById('cabPriceDisplay').textContent = `₹ ${(onSpot * 0.80).toFixed(2)} / hr`;
+        }
+
+        // ==============================
+        // SAVE
+        // ==============================
+        async function saveSettings() {
+            const name = document.getElementById('parkingName').value.trim();
+            const total = parseInt(document.getElementById('totalSlots').value);
+            const resVal = parseFloat(document.getElementById('reservedValue').value);
+            const onSpot = parseFloat(document.getElementById('onSpotPrice').value);
+            const reserved = parseFloat(document.getElementById('reservedPrice').value);
+
+            if (!name) { showToast('Please enter a parking space name.'); return; }
+            if (!total || total < 1) { showToast('Enter a valid number of total slots.'); return; }
+            if (isNaN(resVal) || resVal < 0) { showToast('Enter a valid reserved value.'); return; }
+            if (reservedMode === 'percentage' && resVal > 100) { showToast('Percentage cannot exceed 100%.'); return; }
+            if (reservedMode === 'amount' && resVal > total) { showToast('Reserved slots cannot exceed total.'); return; }
+            if (isNaN(onSpot) || onSpot < 0) { showToast('Enter a valid on-spot price.'); return; }
+            if (isNaN(reserved) || reserved < 0) { showToast('Enter a valid reserved price.'); return; }
+
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+            await new Promise(r => setTimeout(r, 700));
+
+            const owners = getOwners();
+            owners[currentOwner].settings = {
+                parkingName: name,
+                totalSlots: total,
+                reservedMode: reservedMode,
+                reservedValue: resVal,
+                reservedSlots: getComputedReservedSlots(),
+                onSpotPrice: onSpot,
+                reservedPrice: reserved,
+                cabDriverPrice: parseFloat((onSpot * 0.80).toFixed(2))
+            };
+            saveOwners(owners);
+
+            showToast('Settings updated successfully!', 'success');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Settings';
+
+            setTimeout(() => window.location.href = 'owner-dashboard.html', 1200);
+        }
+
+        // ==============================
+        // TOAST
+        // ==============================
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById('toast');
+            const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>'
+                                          : '<i class="fa-solid fa-circle-check"></i>';
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `${icon} ${msg}`;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // Init
+        loadSettings();
+    </script>
+</body>
+</html>

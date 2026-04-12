@@ -1,0 +1,21 @@
+{
+  "_schema_version": "1.0",
+  "_description": "parkNgo owner database — mirrors schema.sql. Loaded into localStorage at runtime.",
+  "owners": {
+    "johndoe@gmail.com": {
+      "passwordHash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "setupComplete": true,
+      "createdAt": "2026-04-12T00:00:00Z",
+      "settings": {
+        "parkingName": "Downtown Parking Hub",
+        "totalSlots": 50,
+        "reservedMode": "percentage",
+        "reservedValue": 20,
+        "reservedSlots": 10,
+        "onSpotPrice": 40.00,
+        "reservedPrice": 60.00,
+        "cabDriverPrice": 32.00
+      }
+    }
+  }
+}
